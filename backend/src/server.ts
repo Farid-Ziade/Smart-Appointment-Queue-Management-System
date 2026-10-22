@@ -1,12 +1,25 @@
+import "dotenv/config";
 import app from "./app.js";
+import { connectDatabase } from "./shared/infrastructure/database.js";
 
-const PORT = 5000;
+const PORT = Number(process.env.PORT || 5000);
 
-app.listen(PORT, (error) => {
-  if (error) {
-    console.error("Could not start the server:", error);
-    return;
+async function startServer() {
+  try {
+    await connectDatabase();
+
+    app.listen(PORT, (error) => {
+      if (error) {
+        console.error("Could not start the server:", error);
+        process.exit(1);
+      }
+
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Could not start the application:", error);
+    process.exit(1);
   }
+}
 
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+startServer();
