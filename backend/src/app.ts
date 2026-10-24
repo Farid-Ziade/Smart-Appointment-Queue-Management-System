@@ -27,6 +27,7 @@ const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, next) => {
       INVALID_INPUT: 400,
       EMAIL_IN_USE: 409,
       UNAUTHORIZED: 401,
+      FORBIDDEN: 403,
     }[error.code];
 
     res.status(status).json({ message: error.message });
