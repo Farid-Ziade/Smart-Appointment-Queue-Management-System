@@ -9,12 +9,16 @@ import { AppError } from "../../../shared/errors/AppError.js";
 import type { TokenService } from "../../../shared/security/TokenService.js";
 import { loginUser } from "../use-cases/LoginUser.js";
 
+import { createRequireAuth } from "./middleware/requireAuth.js";
+
 export function createAuthRouter(
   userRepository: UserRepository,
   passwordHasher: PasswordHasher,
   tokenService: TokenService,
 ) {
   const router = Router();
+
+  const requireAuth = createRequireAuth(userRepository, tokenService);
 
   router.post("/register", async (req, res) => {
     const body = req.body;
@@ -78,6 +82,12 @@ export function createAuthRouter(
       message: "Login successful.",
       accessToken: result.accessToken,
       user: result.user,
+    });
+  });
+
+  router.get("/me", requireAuth, (_req, res) => {
+    res.json({
+      user: res.locals.user,
     });
   });
 

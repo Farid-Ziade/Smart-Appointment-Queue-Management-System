@@ -10,3 +10,5 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type UserProfile = Omit<User, "passwordHash">;

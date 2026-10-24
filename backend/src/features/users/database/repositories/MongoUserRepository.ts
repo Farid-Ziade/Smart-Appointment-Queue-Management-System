@@ -1,6 +1,9 @@
 import type { UserRepository } from "../../business/repositories/UserRepository.js";
 import { UserModel } from "../models/UserModel.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
+import type { User, UserProfile } from "../../business/User.js";
+import { isObjectIdOrHexString } from "mongoose";
+
 export const mongoUserRepository: UserRepository = {
   async findByEmail(email) {
     const user = await UserModel.findOne({
@@ -19,6 +22,27 @@ export const mongoUserRepository: UserRepository = {
       email: user.email,
       phone: user.phone,
       passwordHash: user.passwordHash,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  },
+  async findById(id: string): Promise<UserProfile | null> {
+    if (!isObjectIdOrHexString(id)) {
+      return null;
+    }
+
+    const user = await UserModel.findById(id).exec();
+
+    if (user === null) {
+      return null;
+    }
+
+    return {
+      id: user._id.toString(),
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

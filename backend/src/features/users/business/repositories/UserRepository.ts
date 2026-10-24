@@ -1,5 +1,4 @@
-import type { User, UserRole } from "../User.js";
-
+import type { User, UserProfile, UserRole } from "../User.js";
 export interface CreateUserData {
   fullName: string;
   email: string;
@@ -10,6 +9,8 @@ export interface CreateUserData {
 
 export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
+
+  findById(id: string): Promise<UserProfile | null>;
 
   create(data: CreateUserData): Promise<User>;
 }
