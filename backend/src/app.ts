@@ -23,7 +23,11 @@ const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, next) => {
   }
 
   if (error instanceof AppError) {
-    const status = error.code === "EMAIL_IN_USE" ? 409 : 400;
+    const status = {
+      INVALID_INPUT: 400,
+      EMAIL_IN_USE: 409,
+      UNAUTHORIZED: 401,
+    }[error.code];
 
     res.status(status).json({ message: error.message });
     return;
