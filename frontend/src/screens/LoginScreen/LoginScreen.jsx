@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { loginUser } from "../../shared/sharedServer/authApi.js";
+import {
+  loginUser,
+  getCurrentUser,
+} from "../../shared/sharedServer/authApi.js";
 
 function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -16,8 +19,14 @@ function LoginScreen({ onLogin }) {
     setErrorMessage("");
 
     try {
-      const data = await loginUser(email, password);
-      onLogin(data);
+      const loginData = await loginUser(email, password);
+
+      const user = await getCurrentUser(loginData.accessToken);
+
+      onLogin({
+        accessToken: loginData.accessToken,
+        user,
+      });
     } catch (error) {
       setErrorMessage(
         error?.userMessage || "Could not log in. Please try again.",

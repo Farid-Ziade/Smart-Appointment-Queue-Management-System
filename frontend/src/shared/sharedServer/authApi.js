@@ -8,3 +8,13 @@ export async function loginUser(email, password) {
 
   return response.data;
 }
+
+export async function getCurrentUser(accessToken) {
+  const response = await apiClient.get("/auth/me", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return response.data.user;
+}
