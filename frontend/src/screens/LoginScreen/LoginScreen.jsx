@@ -5,7 +5,7 @@ import {
 } from "../../shared/sharedServer/authApi.js";
 import AP_Textbox from "../../components/ap_textbox.jsx";
 import AP_Button from "../../components/ap_button.jsx";
-
+import { Link } from "react-router";
 function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,6 +73,9 @@ function LoginScreen({ onLogin }) {
 
         {errorMessage && <p role="alert">{errorMessage}</p>}
       </form>
+      <p>
+        <Link to="/register">Create an account</Link>
+      </p>
     </main>
   );
 }

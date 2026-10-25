@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import LoginScreen from "./screens/LoginScreen/LoginScreen.jsx";
 import HomeScreen from "./screens/HomeScreen/HomeScreen.jsx";
-
+import RegisterScreen from "./screens/RegisterScreen/RegisterScreen.jsx";
 function App() {
   const [session, setSession] = useState(null);
 
@@ -28,6 +28,11 @@ function App() {
             <Navigate to="/login" replace />
           )
         }
+      />
+
+      <Route
+        path="/register"
+        element={session ? <Navigate to="/" replace /> : <RegisterScreen />}
       />
 
       <Route

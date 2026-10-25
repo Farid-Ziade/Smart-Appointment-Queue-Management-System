@@ -18,3 +18,8 @@ export async function getCurrentUser(accessToken) {
 
   return response.data.user;
 }
+export async function registerUser(userData) {
+  const response = await apiClient.post("/auth/register", userData);
+
+  return response.data;
+}
