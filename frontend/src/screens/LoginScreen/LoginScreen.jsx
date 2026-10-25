@@ -3,6 +3,8 @@ import {
   loginUser,
   getCurrentUser,
 } from "../../shared/sharedServer/authApi.js";
+import AP_Textbox from "../../components/ap_textbox.jsx";
+import AP_Button from "../../components/ap_button.jsx";
 
 function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -41,37 +43,33 @@ function LoginScreen({ onLogin }) {
       <h1>Log in</h1>
 
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="login-email">Email</label>
-          <input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="username"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={loading}
-            required
-          />
-        </div>
+        <AP_Textbox
+          id="login-email"
+          label="Email"
+          name="email"
+          type="email"
+          autoComplete="username"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          disabled={loading}
+          required
+        />
 
-        <div>
-          <label htmlFor="login-password">Password</label>
-          <input
-            id="login-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={loading}
-            required
-          />
-        </div>
+        <AP_Textbox
+          id="login-password"
+          label="Password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          disabled={loading}
+          required
+        />
 
-        <button type="submit" disabled={loading}>
+        <AP_Button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Log in"}
-        </button>
+        </AP_Button>
 
         {errorMessage && <p role="alert">{errorMessage}</p>}
       </form>

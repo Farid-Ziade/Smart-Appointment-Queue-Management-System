@@ -1,3 +1,5 @@
+import AP_Button from "../../components/ap_button.jsx";
+
 function HomeScreen({ user, onLogout }) {
   return (
     <main>
@@ -6,9 +8,7 @@ function HomeScreen({ user, onLogout }) {
       <p>Welcome, {user.fullName}!</p>
       <p>Email: {user.email}</p>
 
-      <button type="button" onClick={onLogout}>
-        Log out
-      </button>
+      <AP_Button onClick={onLogout}>Log out</AP_Button>
     </main>
   );
 }
