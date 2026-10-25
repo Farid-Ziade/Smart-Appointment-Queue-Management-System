@@ -3,13 +3,14 @@ import { Link } from "react-router";
 import { registerUser } from "../../shared/sharedServer/authApi.js";
 import AP_Textbox from "../../components/ap_textbox.jsx";
 import AP_Button from "../../components/ap_button.jsx";
-
+import { ValidationError } from "yup";
+import { registerSchema } from "./registerSchema.js";
 function RegisterScreen() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [registered, setRegistered] = useState(false);
@@ -21,22 +22,40 @@ function RegisterScreen() {
 
     setLoading(true);
     setErrorMessage("");
+    setFieldErrors({});
 
     try {
-      await registerUser({
-        fullName,
-        email,
-        phone,
-        password,
-      });
+      const validData = await registerSchema.validate(
+        {
+          fullName,
+          email,
+          phone,
+          password,
+        },
+        { abortEarly: false },
+      );
+
+      await registerUser(validData);
 
       setPassword("");
       setRegistered(true);
     } catch (error) {
-      setErrorMessage(
-        error?.userMessage ||
-          "Could not create your account. Please try again.",
-      );
+      if (error instanceof ValidationError) {
+        const errors = {};
+
+        for (const issue of error.inner) {
+          if (issue.path && !errors[issue.path]) {
+            errors[issue.path] = issue.message;
+          }
+        }
+
+        setFieldErrors(errors);
+      } else {
+        setErrorMessage(
+          error?.userMessage ||
+            "Could not create your account. Please try again.",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -56,13 +75,14 @@ function RegisterScreen() {
     <main>
       <h1>Create an account</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <AP_Textbox
           id="register-full-name"
           label="Full name"
           name="fullName"
           autoComplete="name"
           value={fullName}
+          error={fieldErrors.fullName}
           onChange={(event) => setFullName(event.target.value)}
           disabled={loading}
           required
@@ -75,6 +95,7 @@ function RegisterScreen() {
           type="email"
           autoComplete="email"
           value={email}
+          error={fieldErrors.email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={loading}
           required
@@ -87,6 +108,7 @@ function RegisterScreen() {
           type="tel"
           autoComplete="tel"
           value={phone}
+          error={fieldErrors.phone}
           onChange={(event) => setPhone(event.target.value)}
           disabled={loading}
           required
@@ -99,6 +121,7 @@ function RegisterScreen() {
           type="password"
           autoComplete="new-password"
           value={password}
+          error={fieldErrors.password}
           onChange={(event) => setPassword(event.target.value)}
           minLength={8}
           disabled={loading}
