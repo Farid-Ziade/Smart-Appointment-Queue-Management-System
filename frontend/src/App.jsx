@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useAuth } from "./shared/hooks/useAuth.js";
 import { Navigate, Route, Routes } from "react-router";
 import LoginScreen from "./screens/LoginScreen/LoginScreen.jsx";
 import HomeScreen from "./screens/HomeScreen/HomeScreen.jsx";
 import RegisterScreen from "./screens/RegisterScreen/RegisterScreen.jsx";
 function App() {
-  const [session, setSession] = useState(null);
+  const { session, setSession } = useAuth();
 
   return (
     <Routes>
