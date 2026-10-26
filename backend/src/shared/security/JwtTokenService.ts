@@ -1,51 +1,59 @@
 import jwt from "jsonwebtoken";
-
+import { createHash, randomUUID } from "node:crypto";
 import type { TokenService } from "./TokenService.js";
 import { AppError } from "../errors/AppError.js";
-
-const ISSUER = "smart-appointment-api";
-const AUDIENCE = "smart-appointment-web";
-
+import { RevokedTokenModel } from "../database/TechnicalModels.js";
+const issuer = "smart-appointment-api",
+  audience = "smart-appointment-web";
 export function createJwtTokenService(secret: string): TokenService {
-  if (!/^[0-9a-f]{64}$/i.test(secret)) {
+  if (!/^[0-9a-f]{64}$/i.test(secret))
     throw new Error("JWT_SECRET must contain 64 hexadecimal characters.");
+  const key = Buffer.from(secret, "hex");
+  const hash = (token: string) =>
+    createHash("sha256").update(token).digest("hex");
+  function payload(token: string) {
+    try {
+      const result = jwt.verify(token, key, {
+        algorithms: ["HS256"],
+        issuer,
+        audience,
+      });
+      if (
+        typeof result === "string" ||
+        typeof result.sub !== "string" ||
+        !result.sub ||
+        typeof result.exp !== "number"
+      )
+        throw new Error("Invalid token contents.");
+      return { userId: result.sub, expiresAt: new Date(result.exp * 1000) };
+    } catch {
+      throw new AppError("UNAUTHORIZED", "Invalid or expired access token.");
+    }
   }
-
-  const signingKey = Buffer.from(secret, "hex");
-
   return {
-    async createAccessToken(userId: string): Promise<string> {
-      return jwt.sign({}, signingKey, {
+    async createAccessToken(userId) {
+      return jwt.sign({}, key, {
         algorithm: "HS256",
         subject: userId,
-        issuer: ISSUER,
-        audience: AUDIENCE,
+        jwtid: randomUUID(),
+        issuer,
+        audience,
         expiresIn: "1h",
       });
     },
-
-    async verifyAccessToken(token: string): Promise<string> {
-      try {
-        const payload = jwt.verify(token, signingKey, {
-          algorithms: ["HS256"],
-          issuer: ISSUER,
-          audience: AUDIENCE,
-        });
-
-        if (
-          typeof payload === "string" ||
-          !payload ||
-          typeof payload.sub !== "string" ||
-          payload.sub.length === 0 ||
-          typeof payload.exp !== "number"
-        ) {
-          throw new Error("Invalid token contents.");
-        }
-
-        return payload.sub;
-      } catch {
-        throw new AppError("UNAUTHORIZED", "Invalid or expired access token.");
-      }
+    async verifyAccessToken(token) {
+      const result = payload(token);
+      if (await RevokedTokenModel.exists({ _id: hash(token) }))
+        throw new AppError("UNAUTHORIZED", "This session has been logged out.");
+      return result.userId;
+    },
+    async revokeAccessToken(token) {
+      const result = payload(token);
+      await RevokedTokenModel.updateOne(
+        { _id: hash(token) },
+        { $set: { expiresAt: result.expiresAt } },
+        { upsert: true },
+      );
     },
   };
 }

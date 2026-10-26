@@ -91,5 +91,11 @@ export function createAuthRouter(
     });
   });
 
+  router.post("/logout", requireAuth, async (req, res) => {
+    const token = req.get("Authorization")!.match(/^Bearer\s+(\S+)$/i)![1]!;
+    await tokenService.revokeAccessToken(token);
+    res.status(204).end();
+  });
+
   return router;
 }

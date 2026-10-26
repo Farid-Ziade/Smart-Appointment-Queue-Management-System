@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 
 const userSchema = new Schema(
   {
+    requestVersion: { type: Number, default: 0 },
     fullName: {
       type: String,
       required: true,
